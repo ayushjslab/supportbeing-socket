@@ -129,6 +129,15 @@ io.on('connection', (socket) => {
         console.log(`📡 Socket ${socket.id} left session ${sessionId}`);
     });
 
+    // --- SESSION UPDATES (e.g. agent assignment, status change) ---
+    socket.on('session_update', (data) => {
+        const { sessionId, update } = data;
+        if (!sessionId || !update) return;
+
+        console.log(`✨ Session update for ${sessionId}:`, Object.keys(update));
+        io.to(`session:${sessionId}`).emit('session_updated', { sessionId, update });
+    });
+
     // --- MESSAGE BROADCASTING ---
     socket.on('send_message', (data) => {
         const { sessionId, websiteId, message } = data;

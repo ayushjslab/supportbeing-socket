@@ -158,12 +158,24 @@ io.on('connection', (socket) => {
     });
 
     // --- AGENT ASSIGNMENT → push to visitor widget in real-time ---
-    socket.on('agent_assigned', ({ sessionId, agent }) => {
+    socket.on('agent_assigned', ({ sessionId, websiteId, agent }) => {
         if (!sessionId) return;
         const sid = String(sessionId);
         console.log(`👤 Agent ${agent ? agent.name : 'removed'} assigned to session ${sid}`);
-        // Emit directly to the session room so the visitor widget updates its header
-        io.to(`session:${sid}`).emit('agent_assigned', { agent });
+
+        // Emit to the session room (agents viewing this session) AND to the website room
+        // (visitors are always in the website room, but may not yet be in the session room)
+        io.to(`session:${sid}`).emit('agent_assigned', { sessionId: sid, agent });
+
+        if (websiteId) {
+            io.to(`website:${String(websiteId)}`).emit('agent_assigned', { sessionId: sid, agent });
+        } else {
+            // Fallback: look up websiteId from the sender entity
+            const entity = socketToEntity.get(socket.id);
+            if (entity?.data?.websiteId) {
+                io.to(`website:${entity.data.websiteId}`).emit('agent_assigned', { sessionId: sid, agent });
+            }
+        }
     });
 });
 

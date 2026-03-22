@@ -129,15 +129,6 @@ io.on('connection', (socket) => {
         console.log(`📡 Socket ${socket.id} left session ${sessionId}`);
     });
 
-    // --- SESSION UPDATES (e.g. agent assignment, status change) ---
-    socket.on('session_update', (data) => {
-        const { sessionId, update } = data;
-        if (!sessionId || !update) return;
-
-        console.log(`✨ Session update for ${sessionId}:`, Object.keys(update));
-        io.to(`session:${sessionId}`).emit('session_updated', { sessionId, update });
-    });
-
     // --- MESSAGE BROADCASTING ---
     socket.on('send_message', (data) => {
         const { sessionId, websiteId, message } = data;
@@ -157,6 +148,14 @@ io.on('connection', (socket) => {
         if (!websiteId || !session) return;
         console.log(`✨ New session started for website ${websiteId}`);
         io.to(`website:${websiteId}`).emit('new_session', { session });
+    });
+
+    // --- SESSION STATE UPDATES (agent assign, resolve, reopen) ---
+    socket.on('session_updated', ({ websiteId }) => {
+        if (!websiteId) return;
+        console.log(`🔄 Session updated on website ${websiteId}`);
+        // Broadcast to all agents on this website so they refetch sessions
+        io.to(`website:${websiteId}`).emit('session_updated');
     });
 });
 

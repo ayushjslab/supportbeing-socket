@@ -8,9 +8,8 @@ dotenv.config();
 const MONGODB_URI = process.env.MONGODB_URI;
 const PORT = process.env.SOCKET_PORT || 3001;
 
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-    : ["http://localhost:3000", "https://supportbeing.vercel.app", "https://easerank.site"];
+const ALLOWED_ORIGINS = "*"; // Allow all — widget is embedded on any customer website
+
 
 // Mini Schema for Agent
 const agentSchema = new mongoose.Schema({

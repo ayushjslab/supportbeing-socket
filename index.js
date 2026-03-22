@@ -7,7 +7,7 @@ dotenv.config();
 
 
 const MONGODB_URI = process.env.MONGODB_URI;
-const PORT = process.env.SOCKET_PORT || 3001;
+const PORT = process.env.PORT || process.env.SOCKET_PORT || 3001;
 
 const ALLOWED_ORIGINS = "*"; // Allow all — widget is embedded on any customer website
 
@@ -151,6 +151,6 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Socket Server running on port ${PORT}`);
 });

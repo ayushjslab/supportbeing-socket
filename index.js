@@ -154,8 +154,16 @@ io.on('connection', (socket) => {
     socket.on('session_updated', ({ websiteId }) => {
         if (!websiteId) return;
         console.log(`🔄 Session updated on website ${websiteId}`);
-        // Broadcast to all agents on this website so they refetch sessions
         io.to(`website:${websiteId}`).emit('session_updated');
+    });
+
+    // --- AGENT ASSIGNMENT → push to visitor widget in real-time ---
+    socket.on('agent_assigned', ({ sessionId, agent }) => {
+        if (!sessionId) return;
+        const sid = String(sessionId);
+        console.log(`👤 Agent ${agent ? agent.name : 'removed'} assigned to session ${sid}`);
+        // Emit directly to the session room so the visitor widget updates its header
+        io.to(`session:${sid}`).emit('agent_assigned', { agent });
     });
 });
 
